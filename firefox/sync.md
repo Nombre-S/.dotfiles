@@ -2,4 +2,4 @@
 
 Personal profile: https://mzl.la/newdevice
 
-Uni profile: 
+Uni profile: https://mzl.la/newdevice 
