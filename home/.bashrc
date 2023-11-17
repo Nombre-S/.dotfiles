@@ -94,4 +94,4 @@ set -o vi
 
 # Set neovim as default editor.
 export EDITOR=nvim
-
+export VISUAL=nvim
