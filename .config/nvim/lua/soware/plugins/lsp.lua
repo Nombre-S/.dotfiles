@@ -1,6 +1,6 @@
 return {
     'VonHeikemen/lsp-zero.nvim',
-    branch = 'v2.x',
+    branch = 'v3.x',
     dependencies = {
         -- LSP Support
         { 'neovim/nvim-lspconfig' },           -- Required
@@ -13,51 +13,52 @@ return {
         { 'L3MON4D3/LuaSnip' },   -- Required
     },
     config = function()
-        local lsp = require('lsp-zero').preset({})
+        local lsp_zero = require('lsp-zero')
 
-        lsp.on_attach(function(client, bufnr)
-            -- see :help lsp-zero-keybindings
-            -- to learn the available actions
-            lsp.default_keymaps({ buffer = bufnr })
+        lsp_zero.on_attach(function(client, bufnr)
+          -- see :help lsp-zero-keybindings
+          -- to learn the available actions
+          lsp_zero.default_keymaps({buffer = bufnr})
         end)
 
-        -- More language servers:
-        -- https://github.com/williamboman/mason-lspconfig.nvim#available-lsp-servers
-        lsp.ensure_installed({
-            "bashls",
-            "cssls",
-            "emmet_ls",
-            "html",
-            "jsonls",
-            "tsserver",
-            "lua_ls",
-            "marksman",
-            "volar",
-            "pyright"
+        --- if you want to know more about lsp-zero and mason.nvim
+        --- read this: https://github.com/VonHeikemen/lsp-zero.nvim/blob/v3.x/doc/md/guides/integrate-with-mason-nvim.md
+        require('mason').setup({})
+        require('mason-lspconfig').setup({
+          ensure_installed = {
+                "bashls",
+                "cssls",
+                "emmet_ls",
+                "html",
+                "jsonls",
+                "tsserver",
+                "lua_ls",
+                "marksman",
+                "volar",
+                "pyright"
+            },
+          handlers = {
+            -- this first function is the "default handler"
+            -- it applies to every language server without a "custom handler"
+            function(server_name)
+              require('lspconfig')[server_name].setup({})
+            end,
+
+            -- this is the "custom handler" for `lua_ls`
+            lua_ls = function()
+              local lua_opts = lsp_zero.nvim_lua_ls()
+              require('lspconfig').lua_ls.setup(lua_opts)
+            end,
+          }
         })
 
-        -- Settings specific to Neovim for the lua language server, lua_ls
-        require("lspconfig").lua_ls.setup(lsp.nvim_lua_ls())
-
-        lsp.setup()
-
-        local cmp = require("cmp")
+        local cmp = require('cmp')
         local cmp_action = require("lsp-zero").cmp_action()
-        local cmp_autopairs = require('nvim-autopairs.completion.cmp')
-
-        -- If you want insert `(` after select function or method item
-        cmp.event:on(
-            'confirm_done',
-            cmp_autopairs.on_confirm_done()
-        )
+        local cmp_format = lsp_zero.cmp_format()
 
         cmp.setup({
-            window = {
-                completition = cmp.config.window.bordered(),
-            },
-            mapping = {
-                -- This little snippet will confirm with tab, and
-                -- if no entry is selected, will confirm the first item
+          formatting = cmp_format,
+          mapping = {
                 ["<Tab>"] = cmp.mapping(function(fallback)
                     if cmp.visible() then
                         local entry = cmp.get_selected_entry()
@@ -110,7 +111,12 @@ return {
                 -- Navigate between snippet placeholder
                 ['<C-f>'] = cmp_action.luasnip_jump_forward(),
                 ['<C-b>'] = cmp_action.luasnip_jump_backward(),
-            }
+            },
+          snippet = {
+            expand = function(args)
+              require('luasnip').lsp_expand(args.body)
+            end,
+          },
         })
-   end,
+    end,
 }

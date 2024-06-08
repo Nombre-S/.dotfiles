@@ -1,7 +1,0 @@
-[user]
-	name = Nombre-S
-	email = 78140736+Nombre-S@users.noreply.github.com
-[core]
-	editor = nvim
-[init]
-	defaultBranch = main

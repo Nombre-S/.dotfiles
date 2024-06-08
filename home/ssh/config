@@ -1,0 +1,5 @@
+Host progweb
+    HostName ec2-34-195-47-120.compute-1.amazonaws.com
+    User ubuntu
+    Port 22
+    IdentityFile ~/.ssh/IdentityFiles/WebKey.pem
